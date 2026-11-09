@@ -1,235 +1,304 @@
-# Claude Slots
+# Mind the Mug
 
-A Claude Code plugin that pins a small pixel-art slot machine in a neon
-cyberpunk style to the bottom-right of the screen, just above the prompt.
-Every prompt pulls the trigger,
-the reels keep turning for as long as Claude works, and when the turn ends
-they land on your outcome: you might win a **FEATURE**, a **CLIENT**, or
-**A LIFE**.
+**Don't delegate your reasoning. Or you'll get a mug.**
 
-<p align="center"><img src=".claude-plugin/icon.png" width="256" alt="the machine"></p>
+A kind reminder for Claude Code. Once a day, after the last response of a
+turn, a small pixel-art cat shows up at the bottom-right of the screen, just
+above the prompt, and knocks something off its shelf. Almost always the mug.
+It stays there until you send your next prompt, and then it is gone until
+tomorrow.
 
-What you see at the bottom-right of the screen (40 columns × 10 rows,
-truecolor half-block pixels; idle between turns, turning during one):
+<p align="center"><img src=".claude-plugin/icon.png" width="256" alt="a cat on a shelf, next to a mug, a rubber duck, a phone and a plant"></p>
 
-- three reels scrolling an eight-symbol strip: an optic implant (FEATURE), a
-  banknote (CLIENT), a casino token (LIFE), and five fillers (pills, a
-  pistol, a fixer, a deck, a blade), with grain flicker and scanlines on
-  the cabinet
-- the credit balance, and nothing else: no verbs, no timers, no token counts
+## The idea
 
-When the turn completes the reels stop left to right, an outcome overlay
-flashes, and the turn's closing line in the transcript reads like
+1. **You can't control what the model returns.** The same prompt gives a
+   different answer every time. You can ask well and still get the mug.
+2. **You control what you delegate.** Which task, with what context, how
+   much of it, and what you check before you accept the result.
+3. **So delegate the work, never your reasoning.** Deciding what you want,
+   why, and whether what came back is right is your part. Hand that over
+   too, prompt again until something looks right, and you are not working
+   any more. You are asking a cat for a feature.
+
+The plugin is not a score and not a warning. It is a cat, once a day,
+reminding you kindly which part of the work is yours.
+
+Each mascot says it in its own words:
+
+| Mascot | World | You can't pick… | You pick… | Delegate your reasoning and you get… |
+| --- | --- | --- | --- | --- |
+| `cat` (default) | **Shelf Life** · You can ask. The cat decides. | what falls | what goes on the shelf | a mug |
+| `dog` | **Fetch** · Every throw comes back different. | what comes back | what you throw | a sock |
+| `hen` | **Hatch** · Same hen, different egg. | the egg | what you feed her | a plain egg |
+| `lake` | **Catch of the Day** · Same bait, different fish. | the fish | where you cast | an old boot |
+| `oven` | **Proof** · Same recipe, different bake. | how it bakes | what goes in | a plain roll |
+
+<p align="center"><img src="docs/mascots.png" alt="every mascot: the ask, a tap, and each thing that can come back"></p>
+
+More in [docs/CONCEPT.md](docs/CONCEPT.md).
+
+## What you see
+
+Nothing while Claude works, and nothing for the responses in the middle of a
+turn. When the turn ends with its last response, the mascot appears and
+plays the turn back in a few seconds: you ask, it reacts once per tool call
+(a paw tap, a rustle in the bush, a cluck), and then something comes back.
+After that it holds still, with a few words beside it:
 
 ```
-◈ no match  −1 cr  balance 096
-◈ CLIENT  +19 cr  balance 119
+                    Shelf Life · the mug, again  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+                  You can ask. The cat decides.  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+                     You can't pick what falls.  ▀▀▀▀  40 × 10   ▀▀▀▀
+               You pick what goes on the shelf.  ▀▀▀▀  cells of  ▀▀▀▀
+                                                 ▀▀▀▀  pixels    ▀▀▀▀
+                 Don't delegate your reasoning.  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+                           Or you'll get a mug.  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 ```
 
-Interrupting a turn (Esc) or an API error jams the machine, refunds the spin
-and shows `INTERRUPTED · refunded` / `MALFUNCTION · refunded` under the
-prompt for three seconds.
+and the turn's closing line in the transcript reads like
+
+```
+✻ Deliberated for 42s · the mug, again · 3 off the shelf
+✻ Fetched in 1m 4s · a letter · CLIENT · 7 by the door
+```
+
+What comes back is rolled from a fixed, published table when the turn ends.
+It has nothing to do with how good the answer was, on purpose: the cat does
+not know whether you thought. The mug is a reminder, not a verdict.
+
+| Comes back | Odds | cat | dog | hen | lake | oven |
+| --- | --- | --- | --- | --- | --- | --- |
+| nothing | 85% | the mug | a sock | a plain egg | an old boot | a roll |
+| FEATURE | 10% | rubber duck | the ball | a blue egg | a perch | a croissant |
+| CLIENT | 4% | the phone | a letter | a golden egg | a salmon | a cake |
+| A LIFE | 1% | the plant | the leash | a chick | a life ring | a picnic basket |
+| interrupted (Esc) | | it naps | squirrel! | she flies off | it got away | it fell |
+| API error | | hairball | muddy | cracked | snagged | burnt |
+
+Send the next prompt and the mascot leaves. There are no credits, no cost
+per prompt, no score and no sound.
+
+## Setup
+
+There is nothing to set up: install it and the cat shows once a day. To
+change it, type `/mascot` and the words you want, in any order:
+
+```
+/mascot                 show the current settings and every option
+/mascot dog             a specific mascot: cat | dog | hen | lake | oven
+/mascot random          a different one each time
+/mascot always          after every answer, not once a day
+/mascot daily           back to once a day (the default)
+/mascot off             never
+/mascot always random   both at once; "every prompt hen" and "once a day cat" work too
+/mascot now             show it after the next answer, whatever the setting
+/mascot reset           back to the defaults: daily, cat
+```
+
+| Setting | Values | Default |
+| --- | --- | --- |
+| When it shows | `daily` once a day, after the first answer of the day · `always` after every answer · `off` | `daily` |
+| Mascot | `cat` · `dog` · `hen` · `lake` · `oven` · `random` | `cat` |
+
+The same two settings are rows in Claude Code's `/config` menu under the
+plugin (`show` and `mascot` in its `userConfig`), and are asked for when the
+plugin is installed. Whichever you changed last wins.
+
+Details of `daily`:
+
+- It shows after the first turn of the day that ended with an answer. A turn
+  you interrupted, or one that failed, has no last response: it neither
+  shows the mascot nor uses up the day.
+- The day is your local calendar day, and it is shared by every session on
+  the machine: one mascot a day, not one per window.
+- With `always`, interrupted and failed turns show too (the cat naps, the
+  hairball).
 
 ## Requirements
 
 - Claude Code **2.1.287 or newer** (mods are on by default; no environment
-  variable). Validated against 2.1.316.
+  variable). Validated against 2.1.321.
 - A terminal with truecolor and a font that draws `▀` (U+2580) with full-cell
   coverage: iTerm2, Terminal.app, VS Code's terminal, kitty, WezTerm all do.
-- At least 40 columns. Narrower viewports get a one-line readout
-  `[ ◈ SPINNING · 097 cr ]` instead of the sprite.
+- At least 40 columns and 10 free rows above the prompt for the picture.
+  From about 85 columns the words sit beside it; in a band too small for the
+  picture you get one line: `✻ Shelf Life · the mug, again · Don't delegate
+  your reasoning, or you'll get a mug.`
 
-The plugin has **zero runtime dependencies**. Remotion (used to author the
-art) lives only under `art/` and is never loaded by Claude Code.
+The plugin has **zero runtime dependencies**.
 
 ## Install
 
 ### From GitHub (recommended)
 
 ```
-/plugin marketplace add WorldInnovationsDepartment/claude_slots
-/plugin install slots@slots-local
+/plugin marketplace add WorldInnovationsDepartment/mind_the_mug
+/plugin install mind-the-mug@mind-the-mug
 ```
 
 ### From a local checkout
 
 ```bash
-git clone https://github.com/WorldInnovationsDepartment/claude_slots.git
-claude --plugin-dir /path/to/claude_slots
+git clone https://github.com/WorldInnovationsDepartment/mind_the_mug.git
+claude --plugin-dir /path/to/mind_the_mug
 ```
 
 or register the checkout as a local marketplace:
 
 ```
-/plugin marketplace add /path/to/claude_slots
-/plugin install slots@slots-local
+/plugin marketplace add /path/to/mind_the_mug
+/plugin install mind-the-mug@mind-the-mug
 ```
 
-The machine sits above the prompt from the first draw; submit any prompt
-and the reels start turning. `ctrl+x ctrl+a` collapses the band if you
-want it out of the way.
+Send a prompt; when Claude has answered, the cat is there. `ctrl+x ctrl+a`
+collapses the band if you want it out of the way before your next prompt.
 
 ## Commands
 
 | Command | What it does |
 | --- | --- |
-| `/slots:demo [life\|client\|feature\|lose\|aborted\|error\|spinning]` | Plays one spin (or loops one phase) in the transcript using the same engine and sprite sheet, without touching your credits. |
-| `/slots:stats` | Prints balance, spins, wins by class, streaks and the last three outcomes from the persisted store. Read-only. |
+| `/mascot [cat\|dog\|hen\|lake\|oven\|random] [daily\|always\|off] [now]` | Shows or changes the two settings (see Setup). |
+| `/mind-the-mug:demo [mascot\|all] [none\|feature\|client\|life\|abort\|error]` | Previews a mascot without waiting for a turn, using the same engine. Never touches the record. |
+| `/mind-the-mug:stats` | Prints what has come back so far, from the persisted store. Read-only, and not a score. |
 
-Both can be run directly: `node bin/demo.js --outcome=life`,
-`node bin/claude-slots-stats.js`.
+The last two can be run directly: `node bin/demo.js dog life` (animated in a
+real terminal), `node bin/demo.js all`, `node bin/stats.js`.
 
-## Options
+## Upgrading from Claude Slots
 
-Set under the plugin's `userConfig` (Claude Code's plugin settings UI, or the
-`pluginConfigs` block of your settings):
-
-| Option | Default | Meaning |
-| --- | --- | --- |
-| `startCredits` | `100` | Balance a brand-new install starts with (0 to 100000). |
-
-## The economy
-
-| Outcome | Probability | Pays | Net per spin |
-| --- | --- | --- | --- |
-| A LIFE (♥ ♥ ♥) | 1 % | 100 | +99 |
-| CLIENT (💼 💼 💼) | 4 % | 20 | +19 |
-| FEATURE (◆ ◆ ◆) | 10 % | 5 | +4 |
-| no match | 85 % | 0 | −1 |
-
-Each prompt costs 1 credit, charged when the spin starts. At 0 credits the
-spin still runs, costs nothing, and the result line says `on the house`.
-Interrupted and errored turns are refunded and count as neither win nor loss.
-Balance and statistics persist across sessions in the plugin's key-value
-store under `slots.economy`. Outcomes are rolled once per turn
-from a seed of session id, turn count and time, so the reels always land on
-the outcome that was decided when the spin started.
-
-## Upgrading from `claude-slots` (the old name)
-
-Version 0.x was called `claude-slots`. Claude Code 2.1.316 refuses that name
-(the `claude-` prefix is reserved), so the plugin was renamed and old installs
-no longer load; you will see a dim `claude-slots: hooks module did not load`
-line until you remove it:
+This plugin used to be called Claude Slots (plugin id `slots`). Version 1
+pinned a neon slot machine above the prompt and charged a credit per prompt;
+version 2 replaced the machine with the mascots; and the name followed the
+idea. The plugin id is now `mind-the-mug`, so an old install has to be
+replaced:
 
 ```
-/plugin uninstall claude-slots@claude-slots-local
-/plugin marketplace remove claude-slots-local
+/plugin uninstall slots@slots-local
+/plugin marketplace remove slots-local
+/plugin marketplace add WorldInnovationsDepartment/mind_the_mug
+/plugin install mind-the-mug@mind-the-mug
 ```
 
-The old **Tier 2** statusline fallback (`/claude-slots:setup`,
-`/claude-slots:teardown`, `bin/claude-slots-statusline.js`) is gone: mods are
-on by default now, so there is nothing for it to fall back from. If you ran
-the old setup, delete the `statusLine` entry it wrote from
-`~/.claude/settings.json` (the setup script left a `*.claude-slots.bak-*`
-backup beside it). Old credits were stored under a different key and are not
-migrated; a fresh install starts at `startCredits`.
+(or, from a checkout, `/plugin marketplace add /path/to/the/checkout`). The
+old store files (`~/.claude/plugins/store/slots*.json`: the credit balance
+and the earlier record) are not read any more and can be deleted. The
+GitHub repository was renamed with the plugin, from `claude_slots` to
+`mind_the_mug`; the old address redirects.
 
 ## Repository layout
 
 ```
-.claude-plugin/     plugin.json, marketplace.json, icon.png
-hooks/hooks.json    "modules": ["./slots.js"]
-hooks/slots.js      the mod: the only file that touches `$` / `on` / `next`
+.claude-plugin/     plugin.json (the two settings), marketplace.json, icon.png
+hooks/mug.js      the mod module: the only file that touches the engine ($)
 lib/
-  machine.js        time-driven state machine: phases, reel offsets, result line
-  sprite-frame.js   sheet + state -> Frame of ▀ cells (both colours always set)
-  sprites.json      the sprite sheet (built, committed, ≤ 400 KB)
-  sprites.js        the same sheet as a module (the mod loader imports code only)
-  symbols.js        symbols, probabilities, payouts (mirrors docs/ART-SPEC.md)
-  rng.js            seeded outcome roll
-  economy.js        credits, payouts, refunds
-  frame.js, render-tree.js, render-ansi.js, width.js
-  mod-helpers.js    pure helpers for hooks/slots.js (testable from Node)
-bin/demo.js         terminal demo player (ANSI, 10 fps)
-bin/claude-slots-stats.js
-commands/           /slots:demo, /slots:stats
-art/                the Remotion project: single source of the machine art + launch video
-scripts/dev/
-  build-sprites.js  art/ -> lib/sprites.json + lib/sprites.js + docs/sprites-contact.png
-  make-music.js     synthesizes the launch video's soundtrack (no licensed audio)
-  pty-smoke.py      live verification in a real terminal
-docs/               ARCHITECTURE.md, ART-SPEC.md, sprites-contact.png, launch.mp4, review/
+  mascots.js        the five mascots and every word they say
+  scenes/*.js       cat, dog, hen, lake, oven: one draw(buffer, state, now) each
+  pixels.js         the 40 x 20 pixel buffer, a 3x5 font, small maths
+  show.js           one showing: timeline, frame, turn line, caption
+  rng.js            the odds table and the seeded roll
+  mod-helpers.js    settings, /mascot grammar, the once-a-day rule, the record, band layout
+  frame.js, width.js, render-tree.js, render-ansi.js   Frame model and its two renderers
+bin/demo.js         /mind-the-mug:demo
+bin/stats.js        /mind-the-mug:stats
+commands/           the two file commands (/mascot is registered by the mod itself)
 tests/              node --test
+scripts/dev/        contact-sheet.js, pty-smoke.py, make-music-v3.js, verify-launch-v3.py
+docs/               CONCEPT.md, ARCHITECTURE.md, ART-SPEC.md, mascots.png
+art/                Remotion project of the launch video (see below)
+openspec/           specs
 ```
 
 ## Development
 
 ```bash
-claude plugin validate .          # manifest, marketplace and mod module: must pass with zero errors
-node --test tests/*.test.js       # engine, sprite sheet, economy, rng, renderers
-node bin/demo.js --outcome=life   # watch a spin in your terminal
+claude plugin validate .               # manifest, marketplace and mod module: must pass with zero errors
+node --test tests/*.test.js            # scenes, timeline, odds, settings, once-a-day rule, the hooks end to end
+node bin/demo.js cat life              # watch one showing in your terminal
+node scripts/dev/contact-sheet.js      # regenerate docs/mascots.png and .claude-plugin/icon.png
 ```
-
-### Rebuilding the sprite sheet
-
-The art is authored once, in `art/src/machine/`, as a Remotion composition.
-The terminal sprite sheet and the launch video are two renders of it. After
-changing anything there:
-
-```bash
-cd art && npm install && cd ..          # once; installs Remotion + its headless Chromium under art/
-node scripts/dev/build-sprites.js       # renders every layer, quantises to the 24-colour palette
-node --test tests/*.test.js             # the sheet tests guard geometry, palette, seams, overlays
-```
-
-The build is deterministic (two runs produce byte-identical `lib/sprites.json`)
-and refuses any pixel that is not exactly in the palette. If Chromium cannot
-be downloaded, pass `--browser-executable=<path>`.
-
-`docs/sprites-contact.png` is a contact sheet of every layer for review, and
-Remotion Studio shows the components live:
-
-```bash
-cd art && npx remotion studio src/index.ts
-```
-
-### Rendering the launch video
-
-```bash
-node scripts/dev/make-music.js                                   # -> art/public/launch-track.wav (synthesized, offline)
-cd art && npx remotion render src/index.ts Launch ../docs/launch.mp4 --codec h264 --crf 17 --overwrite
-```
-
-The soundtrack script and the `Launch` composition share `art/src/timeline.json`
-(BPM, scene starts, reel-stop frames), so the accents land on the reel stops.
 
 ### Live verification in a real terminal
 
 ```bash
-python3 scripts/dev/pty-smoke.py --tui default    --out /tmp/run1
-python3 scripts/dev/pty-smoke.py --tui fullscreen --out /tmp/run2
+python3 scripts/dev/pty-smoke.py --tui fullscreen --prompt2 "Say bye." --out /tmp/run1
+python3 scripts/dev/pty-smoke.py --tui default --prompt "/mascot now" --seconds 8 --prompt2 "Say hi." --out /tmp/run2
 ```
 
-Each run drives a real `claude --plugin-dir .` session through a PTY, sends a
-prompt, and counts `▀` rows; with `pyte` installed it also reconstructs the
-screen twice a second and checks that the 40 × 10 sprite rectangle is fully
-painted (no stale transcript text inside it) and disappears after the turn.
+(Add `--claude-bin "$(which claude)"` if the script's default path is not
+your binary.) Each run drives a real `claude --plugin-dir .` session through a PTY and
+counts `▀` rows; with `pyte` installed it also reconstructs the screen twice
+a second and checks for the fully painted 40 × 10 rectangle. In the first
+run the picture must appear only after the first answer, stay until the
+second prompt is sent, and not come back after the second answer (run it on
+a day the mascot has not shown yet, or after `/mascot now`).
+
+### The launch video
+
+`docs/launch-v3.mp4` is the launch video: 51 seconds, cut for a feed, slow
+enough to read and readable with the sound off.
+
+1. "You wanted a feature." The cat knocks the mug off. "You got a mug."
+2. "So you ask again." Three more mugs. "That's not reasoning. That's re-rolling."
+3. "You can't control what the model returns. You control what you
+   delegate." Then, on the drop: "Don't delegate your reasoning. Or you'll
+   get a mug."
+4. The plugin in a terminal: once a day, after the last response, gone at
+   your next prompt.
+5. Two of the other mascots, held: the dog ("Or you'll get a sock.") and the
+   hen ("Or you'll get a plain egg.").
+6. The end card: the name, the install lines, and the cat knocking the mug
+   off one last time. That thud is the last sound of the track.
+
+Every mascot in it is drawn by the plugin's own code in `lib/scenes/`.
+
+```bash
+node scripts/dev/make-music-v3.js            # -> art/public/launch-track-v3.wav (synthesized, offline)
+cd art && npm install && npm run render:launch-v3   # -> docs/launch-v3.mp4
+python3 scripts/dev/verify-launch-v3.py      # probe, frame grabs into docs/review-v3/, hits and ending in the audio
+```
+
+The composition (`art/src/LaunchV3.tsx`, scenes in `art/src/launch-v3/`) and
+the soundtrack share `art/src/timeline-v3.json`: tempo, scene starts, the
+drop, every hit and the final one.
+
+`Launch` and `LaunchV2` in the same project are the videos of version 1, the
+slot machine, when the plugin was called Claude Slots (`docs/launch.mp4`,
+`docs/launch-v2.mp4`), with their own `make-music.js` and
+`verify-launch.py`. They are kept for the record.
 
 ## Troubleshooting
 
-- **No machine above the prompt.** Run
+- **No mascot after the answer.** With `daily` it has probably shown already
+  today, in this or another session: `/mascot` prints the setting, and
+  `/mascot now` shows it after the next answer. Otherwise run
   `claude plugin validate .` in the plugin directory and
   `claude --plugin-dir . --debug`; a mod that fails to load prints one dim
   line naming the reason. The most common cause is a Claude Code older than
   2.1.287.
+- **I interrupted the first turn of the day and nothing showed.** Expected:
+  with `daily` an interrupted turn does not count, so the next turn that
+  ends with an answer shows it.
 - **Colours look flat or wrong.** The terminal is not advertising truecolor;
   set `COLORTERM=truecolor`. The ANSI demo falls back to 256 colours.
 - **Rows of `▀` look like gaps.** The font does not cover the full cell with
   U+2580; switch the terminal font (any of the fonts bundled with the
   terminals listed above work).
-- **No result line after an interrupted turn.** Expected: Claude Code draws
-  no closing line for aborted turns, so the refund notice goes under the
-  prompt instead.
+- **The usual `Baked for 42s` line instead of the mascot's.** Claude Code
+  draws that line only for turns long enough to have one, and never for an
+  interrupted turn; the words beside the mascot say the same thing.
 
 ## Uninstall
 
 ```
-/plugin uninstall slots@slots-local
+/plugin uninstall mind-the-mug@mind-the-mug
 ```
 
-or stop passing `--plugin-dir`. Persisted credits live in
-`~/.claude/plugins/store/slots*.json`; delete that file to reset.
+or stop passing `--plugin-dir`. The record (the last day shown, what came
+back, a `/mascot` choice) lives in `~/.claude/plugins/store/mind-the-mug*.json`;
+delete that file to reset.
+
+Unofficial fan project, not affiliated with or endorsed by Anthropic.
 
 ## License
 

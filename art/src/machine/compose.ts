@@ -16,8 +16,8 @@ export type MachineState = {
   offsets: readonly [number, number, number];
   /** Credit balance; displayed clamped to 999. */
   balance: number;
-  /** Active overlay frame, or null. */
-  overlay: { id: OverlayId; frame: number } | null;
+  /** Active overlay frame, or null. `bandWords` overrides the jackpot band's text (video only). */
+  overlay: { id: OverlayId; frame: number; bandWords?: readonly string[] } | null;
 };
 
 let cachedStrip: Grid | null = null;
@@ -66,6 +66,6 @@ export function composeMachine(state: MachineState): Grid {
       }
     }
   }
-  if (state.overlay) blit(g, overlayGrid(state.overlay.id, state.overlay.frame), 0, 0);
+  if (state.overlay) blit(g, overlayGrid(state.overlay.id, state.overlay.frame, state.overlay.bandWords), 0, 0);
   return g;
 }

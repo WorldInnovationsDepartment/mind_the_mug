@@ -1,0 +1,29 @@
+{
+  "fps": 30,
+  "bpm": 160,
+  "durationInFrames": 900,
+  "scenes": [
+    { "id": "title", "start": 0 },
+    { "id": "terminal", "start": 48 },
+    { "id": "pull-lose", "start": 204 },
+    { "id": "pull-feature", "start": 324 },
+    { "id": "pull-client", "start": 444 },
+    { "id": "pull-touch-grass", "start": 564 },
+    { "id": "payoff", "start": 750 }
+  ],
+  "machine": {
+    "spinupMs": 400,
+    "reelSpeed": [44, 50, 56],
+    "stoppingStaggerMs": 300,
+    "stopMs": 600,
+    "minStopTravelPx": 64,
+    "overlayFrameMs": 100
+  },
+  "pulls": [
+    { "id": "lose", "outcome": "LOSE", "symbols": ["LIFE", "GUN", "PILLS"], "leverFrame": 212, "stopFrame": 258, "reelStops": [276, 285, 294], "balanceBefore": 99, "payout": 0 },
+    { "id": "feature", "outcome": "FEATURE", "symbols": ["FEATURE", "FEATURE", "FEATURE"], "leverFrame": 332, "stopFrame": 378, "reelStops": [396, 405, 414], "balanceBefore": 98, "payout": 5 },
+    { "id": "client", "outcome": "CLIENT", "symbols": ["CLIENT", "CLIENT", "CLIENT"], "leverFrame": 452, "stopFrame": 498, "reelStops": [516, 525, 534], "balanceBefore": 102, "payout": 20 },
+    { "id": "touch-grass", "outcome": "LIFE", "symbols": ["LIFE", "LIFE", "LIFE"], "leverFrame": 574, "stopFrame": 648, "reelStops": [666, 675, 684], "balanceBefore": 121, "payout": 100 }
+  ],
+  "terminal": { "id": "terminal", "outcome": "LOSE", "symbols": ["PILLS", "GUN", "AGENT"], "leverFrame": 58, "stopFrame": 112, "reelStops": [130, 139, 148], "balanceBefore": 100, "payout": 0 }
+}

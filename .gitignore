@@ -21,5 +21,14 @@ __pycache__/
 # art/ `npm run render:launch` and scripts/dev/verify-launch.py). Kept out of
 # the repo so a marketplace install stays small.
 docs/launch.mp4
+docs/launch-v2.mp4
+docs/launch-v3.mp4
 docs/review/
+docs/review-v2/
+docs/review-v3/
 art/public/launch-track.wav
+art/public/launch-track-v2.wav
+art/public/launch-track-v3.wav
+
+# Local brainstorm-server state (holds a session key). Never commit.
+.superpowers/

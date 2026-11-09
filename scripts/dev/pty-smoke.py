@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Claude Slots — live PTY smoke test for the mod.
+"""Mind the Mug — live PTY smoke test for the mod.
 
 Drives a real `claude` process through a pseudo-terminal (winsize 120x40 by
 default, TERM=xterm-256color, COLORTERM=truecolor), sends one prompt, waits,
 sends /exit, and always kills the child. Launches with
   --plugin-dir <repo root>
-so hooks/hooks.json's "modules": ["./slots.js"] loads as a mod (mods are on
+so hooks/hooks.json's "modules": ["./mug.js"] loads as a mod (mods are on
 by default since Claude Code 2.1.287; no env flag).
 
 Usage:
@@ -20,7 +20,9 @@ Output:
 
 The marker counted in the stripped capture is `▀` (U+2580), the half-block
 cell every sprite row is made of: it never appears elsewhere in the UI, so
-its presence is the signal that the machine actually rendered.
+its presence is the signal that the mascot actually rendered. The mascot
+shows after the answer (once a day by default; `--prompt "/mascot now"`
+forces it for the next turn) and leaves when the next prompt is sent.
 
 With `pyte` importable, the screen is reconstructed every --snapshot-every
 seconds and each snapshot is checked for the sprite rectangle: a block of 10
