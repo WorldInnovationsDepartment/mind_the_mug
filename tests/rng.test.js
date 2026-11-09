@@ -1,50 +1,30 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mulberry32, hashSeed, rollOutcome } from '../lib/rng.js';
-import { OUTCOME_PROBABILITIES, SYMBOL_IDS, PAYTABLE } from '../lib/symbols.js';
+import { rollOutcome, pickFrom, hashSeed, ODDS, OUTCOME_ORDER } from '../lib/rng.js';
 
-test('mulberry32 is deterministic and returns floats in [0, 1)', () => {
-  const a = mulberry32(42);
-  const b = mulberry32(42);
-  for (let i = 0; i < 20; i++) {
-    const x = a();
-    assert.equal(x, b());
-    assert.ok(x >= 0 && x < 1);
-  }
+test('the odds table sums to 1 and is the published one', () => {
+  assert.deepEqual({ ...ODDS }, { life: 0.01, client: 0.04, feature: 0.1, none: 0.85 });
+  assert.ok(Math.abs(OUTCOME_ORDER.reduce((s, o) => s + ODDS[o], 0) - 1) < 1e-9);
 });
 
-test('hashSeed is deterministic and spreads different strings apart', () => {
-  assert.equal(hashSeed('abc'), hashSeed('abc'));
-  assert.notEqual(hashSeed('abc'), hashSeed('abd'));
-  assert.ok(Number.isInteger(hashSeed('x')) && hashSeed('x') >= 0);
+test('rollOutcome is deterministic per seed, for numbers and strings', () => {
+  for (const seed of [0, 1, 42, 'abc', 'session:3:1700000000000']) assert.equal(rollOutcome(seed), rollOutcome(seed));
 });
 
-test('rollOutcome: identical seed always reproduces an identical result', () => {
-  assert.deepEqual(rollOutcome(12345), rollOutcome(12345));
-  assert.deepEqual(rollOutcome('turn-abc'), rollOutcome('turn-abc'));
+test('rollOutcome follows the table over many seeds', () => {
+  const n = 200000;
+  const counts = { none: 0, feature: 0, client: 0, life: 0 };
+  for (let i = 0; i < n; i++) counts[rollOutcome(hashSeed('s:' + i))] += 1;
+  for (const o of OUTCOME_ORDER) assert.ok(Math.abs(counts[o] / n - ODDS[o]) < 0.005, `${o}: ${counts[o] / n}`);
 });
 
-test('rollOutcome: well formed — win classes are three of a kind, losses never are', () => {
-  for (let seed = 0; seed < 5000; seed++) {
-    const o = rollOutcome(seed);
-    assert.ok(Object.keys(OUTCOME_PROBABILITIES).includes(o.outcomeClass));
-    assert.equal(o.symbols.length, 3);
-    for (const s of o.symbols) assert.ok(SYMBOL_IDS.includes(s));
-    assert.equal(o.payout, PAYTABLE[o.outcomeClass]);
-    if (o.outcomeClass === 'LOSE') assert.ok(!(o.symbols[0] === o.symbols[1] && o.symbols[1] === o.symbols[2]));
-    else assert.deepEqual(o.symbols, [o.outcomeClass, o.outcomeClass, o.outcomeClass]);
+test('pickFrom is deterministic and reaches every entry', () => {
+  const list = ['cat', 'dog', 'hen', 'lake', 'oven'];
+  const seen = new Set();
+  for (let i = 0; i < 500; i++) {
+    const p = pickFrom(i, list);
+    assert.equal(p, pickFrom(i, list));
+    seen.add(p);
   }
-});
-
-test('empirical class frequencies over 100000 sequential seeds are within 10 % relative error of the table', () => {
-  const N = 100000;
-  const counts = {};
-  for (let i = 0; i < N; i++) {
-    const o = rollOutcome(i);
-    counts[o.outcomeClass] = (counts[o.outcomeClass] || 0) + 1;
-  }
-  for (const [cls, p] of Object.entries(OUTCOME_PROBABILITIES)) {
-    const observed = (counts[cls] || 0) / N;
-    assert.ok(Math.abs(observed - p) / p < 0.1, `${cls}: observed ${observed}, expected ${p}`);
-  }
+  assert.deepEqual([...seen].sort(), [...list].sort());
 });

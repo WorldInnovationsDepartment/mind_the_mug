@@ -1,4 +1,6 @@
 {
-  "description": "Claude Slots: a mod module that pins a pixel-art slot machine to the band above the prompt (bottom-right of the screen) and draws a one-line result in TurnDuration.",
-  "modules": ["./slots.js"]
+  "description": "Mind the Mug: a mod module that shows a pixel-art mascot in the band above the prompt after the last response of a turn (once a day by default), until the next prompt is sent, with the reminder not to delegate your reasoning, and registers /mascot.",
+  "modules": [
+    "./mug.js"
+  ]
 }

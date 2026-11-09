@@ -1,114 +1,156 @@
 # Architecture
 
-Claude Slots is a Claude Code **mod**: a hooks module (`hooks/slots.js`)
-that draws the machine in the `AbovePrompt` band, pinned to the
-bottom-right of the screen for the whole session, and takes over the
-`TurnDuration` site for the one-line result when a turn ends. Everything else is a dependency-free,
-time-driven engine in `lib/` and a Remotion project in `art/` that is the
-single source of the machine's pixels.
+Mind the Mug is one Claude Code mod (plugin id `mind-the-mug`). After the last
+response of a turn, once a day by default, it draws a 40 × 10-cell pixel-art
+mascot in the `AbovePrompt` band, bottom-right, with a few words beside it,
+and keeps it there until the next prompt is sent. The words are the point,
+a kind reminder: don't delegate your reasoning, or you'll get a mug
+([CONCEPT.md](CONCEPT.md)).
 
 ```
-prompt.submit ──► pullLever(now, seed) ──► ticker $.clock.every(100ms) ──► $.ui.invalidate('ui.render')
-                                                                                  │
-ui.render AbovePrompt ◄──────── machine.frame(state, now) ◄── sprite-frame.js ◄───┘
-turn.complete ──► stop(now, reason) ──► economy settles ──► $.store.set('slots.economy')
-ui.render TurnDuration ──► resultLine()
+hooks/mug.js ── the only file that touches the engine ($ / on / next)
+      │
+      ├─ lib/mod-helpers.js   settings, /mascot grammar, once-a-day rule, the record, band layout
+      ├─ lib/show.js          one showing: timeline → pixel buffer → Frame, turn line, caption
+      │     ├─ lib/mascots.js     the five mascots and their words
+      │     ├─ lib/scenes/*.js    cat, dog, hen, lake, oven: draw(buffer, state, now)
+      │     └─ lib/pixels.js      40 × 20 buffer, 3×5 font, maths
+      ├─ lib/rng.js           the odds table and the seeded roll
+      └─ lib/render-tree.js   Frame → element tree   (lib/render-ansi.js → ANSI, for bin/demo.js)
 ```
 
-## 1. The mod module (`hooks/slots.js`)
+Everything under `lib/` is pure ESM with no dependencies and no engine
+access, so it runs unchanged in the mod, in `bin/demo.js`, in
+`scripts/dev/contact-sheet.js` and under `node --test`.
 
-The only file that may touch `$`, `on` and `next`; `claude plugin validate`
-runs a static scanner over it. Rules it keeps to:
+## 1. The mod module (`hooks/mug.js`)
 
-- `register(on, options)` is the only export.
-- `$` is used only as `$.noun.method(...)` inside hook bodies or top-level
-  helpers in the same file, or passed whole to such a helper.
-- `next(e)` is called inline in the hook that received it; `turn.step` is an
-  `async function*` that does `const r = yield* next(e)` and returns `r`.
-- Imports are code files only (`lib/*.js`); the sprite sheet is therefore
-  imported as `lib/sprites.js`, a generated module twin of `lib/sprites.json`.
-
-Hooks registered:
-
-| Event | What it does |
+| Event | What the mod does |
 | --- | --- |
-| `session.start` | Resets transient state, loads the persisted economy from `$.store`, invalidates once so the band shows the idle machine. |
-| `prompt.submit` | Awaits `next(e)` first; unless the chain dropped the prompt, pulls the lever (seed = session id : turn count : now) and starts the 100 ms ticker. |
-| `turn.step` | Streams every chunk through unchanged; timestamps a tool pulse. Ignored for subagent loops (`e.agentId`). |
-| `turn.complete` | `machine.stop(now, reason)`, snapshot for TurnDuration, persist, toast on A LIFE, `$.ui.status` refund notice on abort/error (cleared after 3 s), poll until the animation ends and stop the ticker. Ignored for subagent loops. |
-| `ui.render AbovePrompt` | Terminal surface only; yields to a survey. Draws `machine.frame` through `renderTree` inside a full-width row Box with `justifyContent: flex-end`, so the sprite sits at the band's right edge; below 40 columns or 10 rows of band it draws the one-line fallback instead. Always on: idle at rest between turns, spinning during one, outcome overlay when it ends. The built-in Spinner is untouched. |
-| `ui.render TurnDuration` | Binds the instance to the finished spin by `durationMs` (its `requestId` is fresh per mount) and draws the static result line. |
+| `session.start` | Clears its in-memory state and registers the `/mascot` command. |
+| `turn.start` (main loop) | Resets the tool-call count; hides a mascot still on screen. |
+| `turn.step` (streaming) | Passes every chunk through; counts the main loop's tool calls. |
+| `turn.complete` (main loop) | Decides whether this last response gets a show, rolls it, records it, starts it. |
+| `prompt.submit` | After the chain has run and nothing dropped the prompt: hides the mascot. A slash command is not a prompt. |
+| `ui.render` `AbovePrompt` | Draws the show while one is live; otherwise `next(e)`: the band is not ours. |
+| `ui.render` `TurnDuration` | Draws the mascot's turn line for the turn that got the show; every other line is the engine's. |
+| `command.run` `mascot` | Reads the words, stores the choice, answers with the settings in force. |
 
-Platform facts this build relies on (Claude Code 2.1.316):
+Three rules make "only the last response" true:
 
-- `$.clock.now()` resolves a promise; `$.session.turns()` counts prompts.
-- `turn.*` events fire for subagent loops too, with `e.agentId` set.
-- The ticker is `$.clock.every(100, …)`; `$.ui.invalidate` is budgeted at
-  10 redraws/s, which is the sprite's frame rate.
-- `TurnDuration` never mounts for an aborted turn, hence the status line.
-- The Ink renderer skips unstyled whitespace with cursor jumps, so a cell
-  without a colour can show stale transcript text. Every sprite cell is a
-  `▀` with both `color` and `backgroundColor` set; the PTY smoke test checks
-  the rectangle is fully painted.
-- A `Raster` element with `$.ui.blit` (cell grid, up to 120 blits/s) exists
-  on the terminal surface. It is a possible future path for the sprite; the
-  current build uses plain `Text` spans, which were verified live.
+1. A show is created in `turn.complete` and nowhere else. Nothing is drawn
+   while a turn runs, so no response in the middle of a turn can have one.
+2. `turn.*` events with `e.agentId` belong to a subagent's loop and are
+   ignored: a subagent's answer is not the turn's last response.
+3. The show is removed at the next `prompt.submit` (or `turn.start`, for a
+   turn that starts without a typed prompt).
+
+### When a turn gets a show (`isDue`)
+
+| Setting | Shows after… |
+| --- | --- |
+| `daily` (default) | the first turn of the local day that ended with an answer (or a refusal). An interrupted or failed turn neither shows nor uses up the day. |
+| `always` | every turn, interrupted and failed ones included (as the mascot's abort / error scene). |
+| `off` | nothing. |
+| `/mascot now` | the next turn, whatever the setting (a one-shot flag in the record). |
+
+The day already shown is read from `$.store` at each `turn.complete`, so it
+is shared by every session on the machine.
+
+### Settings
+
+Two settings, declared as `userConfig` in `.claude-plugin/plugin.json`, both
+string pickers: `show` (`daily` · `always` · `off`) and `mascot` (`cat` ·
+`dog` · `hen` · `lake` · `oven` · `random`). They arrive as `register`'s
+`options` and are rows in `/config`.
+
+`/mascot` changes them without the menu. It stores the choice in the record
+together with the options it was made over (`basedOn`) and then mirrors each
+changed field into its `/config` row with `$.config.set`. The settings in
+force (`effectiveSettings`) are, per field: the stored choice while the row
+still holds what it held then (or already holds the choice), otherwise the
+row. So the last change wins whichever way it was made, and the command
+works even where the rows cannot be written.
+
+### State
+
+| Where | What | Lifetime |
+| --- | --- | --- |
+| module variables | the live show, the tool-call count, the ticker, the queue binding a show to its `TurnDuration` line | until reload / `session.start` |
+| `$.store` key `mind-the-mug.record` | `lastDay`, `showNext`, `settings` (the `/mascot` choice), `shows`, `outcomes`, and per mascot `tally` + `kept` (the last four things it brought back, drawn in the scene) | across sessions |
+
+A redraw ticker (`$.clock.every`, 100 ms) runs only while a show is still
+moving, about 7 to 9 seconds, and is stopped by a poll once the show rests.
+A resting show costs nothing: no timers, and the frame is frozen.
+
+Every hook body is wrapped in try/catch and falls back to `next(e)`; the
+mascot not showing is always the failure mode.
 
 ## 2. The engine (`lib/`)
 
-Pure ESM, no dependencies, no Node APIs: the same code runs in the mod's
-worker, in `bin/demo.js`, and under `node --test`.
+**A show** (`lib/show.js`) is plain JSON: `{ mascot, outcome, ending, at,
+taps, kept, tally, durationMs }`. Every function is pure in `(show, now)`:
 
-- **`machine.js`**: `createState`, `pullLever(state, now, seed)`,
-  `stop(state, now, reason)`, and pure queries of `(state, now)`:
-  `phaseAt`, `reelOffsets`, `overlayAt`, `isAnimating`, `frame`,
-  `resultLine`, `fallbackLine`. Phases:
-  `IDLE → SPINUP → SPINNING → STOPPING → OUTCOME → RESULT`, or
-  `SPINNING → JAM | MALFUNCTION → RESULT` on abort/error. Timing constants
-  live in `TIMINGS` and are documented in ART-SPEC.md.
-- **`sprite-frame.js`**: decodes the sheet once, composes
-  cabinet → scrolled reel windows → digits → overlay into a 20 × 40 pixel
-  grid, then packs pixel rows 2k/2k+1 into one row of `▀` cells with runs of
-  identical (top, bottom) colour pairs coalesced. Mirrors
-  `art/src/machine/compose.ts`.
-- **`symbols.js`, `rng.js`, `economy.js`**: the tables, the seeded
-  outcome-first roll, and the credit rules.
-- **`frame.js`**: the rectangular `Frame = { width, lines: Span[][] }`
-  contract between the engine and the two renderers.
-- **`render-tree.js`** (Ink element tree for the mod) and
-  **`render-ansi.js`** (truecolor ANSI with a 256-colour fallback for the
-  demo and the PTY harness).
-- **`mod-helpers.js`**: option parsing, store merge, the TurnDuration spin
-  queue, refund notice text. Pure, so `tests/mod-helpers.test.js` covers the
-  module's logic without the scanner constraints.
+```
+at                start    the ask                      1.0 s
+at + 1.0 s        work     1.2 s + 0.5 s per tap        taps = tool calls of the turn, at most 4
+then              reveal   what came back               4.4 s   (abort / error: 2.8 s)
+after that        rest     the last frame, held still   until the next prompt
+```
 
-## 3. The art pipeline (`art/` → `lib/sprites.json`)
+`stageAt(show, now)` maps that to the scene's phase, the instant the phase
+began, and the clock the scene draws with (frozen at rest). `draw` calls the
+mascot's scene into a 40 × 20 pixel buffer; `bufToFrame` packs pixel rows 2k
+and 2k+1 into cell row k of `▀`, foreground = top pixel, background = bottom
+pixel, so every one of the 400 cells is painted with two colours and no
+stale text can show through.
 
-`art/` is its own npm project (Remotion 4.0.540, React 19). The machine is
-drawn on a 40 × 20 unit grid by pure grid builders
-(`cabinet-grid.ts`, `strip-grid.ts`, `digits-grid.ts`, `overlay-grid.ts`,
-`compose.ts`) and rendered by `Pixels.tsx` as crisp SVG rectangles at
-`scale` px per unit: 1 for the sprite stills, 27 for the video.
+**A scene** (`lib/scenes/*.js`) is `{ draw(buffer, state, now), keeps(outcome) }`
+with `state = { phase, t0, outcome, pulses, kept }` and phases `idle`,
+`start`, `work`, `reveal`, `abort`, `error`. Scenes are procedural: sprites
+are small string grids, everything else is rectangles, lines and curves.
+There is no sprite sheet and no build step.
 
-`scripts/dev/build-sprites.js` bundles the project once with
-`@remotion/bundler`, renders every `Sprite*` still and `Overlay*` sequence
-with `@remotion/renderer`, decodes the PNGs with the pure-JS codec in
-`scripts/dev/png.js`, quantises each pixel to an **exact** palette index
-(any off-palette pixel fails the build), and writes `lib/sprites.json`,
-`lib/sprites.js` and `docs/sprites-contact.png`. There is no randomness in
-the composition (grain comes from a seeded hash), so two builds are
-byte-identical.
+**The roll** (`lib/rng.js`): `rollOutcome(seed)` walks the table A LIFE 1%,
+CLIENT 4%, FEATURE 10%, nothing 85% with one draw of a seeded mulberry32;
+the seed is a hash of session id, turn count and the clock. It is rolled
+when the turn ends and is independent of everything about the turn.
+
+**The Frame model** (`lib/frame.js`): `{ width, lines: Span[][] }` with
+`Span = { text, color?, bg?, bold?, dim? }`, rendered to an element tree for
+the mod (`render-tree.js`, allow-listed Text props only) or to ANSI for the
+demo (`render-ansi.js`).
+
+**The band** (`bandTree`): a full-width row Box, `justifyContent: flex-end`,
+`alignItems: flex-end`, holding the caption column (right-aligned, 2 cells
+of margin) and the sprite. The caption is dropped when `bodyColumns` has no
+room for it beside the sprite; when the band has fewer than 40 columns or
+10 rows the whole thing falls back to one line of text.
+
+## 3. Art
+
+The scenes come from the "Lighter worlds" direction study (five worlds
+drawn at the mod's real size); `lib/scenes/*.js` are those drawings, and
+[ART-SPEC.md](ART-SPEC.md) describes them. `scripts/dev/contact-sheet.js`
+renders `docs/mascots.png` and the plugin icon from the same code.
+
+`art/` is the Remotion project of the launch video. `LaunchV3` imports
+`lib/scenes/` through `art/src/launch-v3/engine.ts`, so the video shows
+exactly what the mod draws; the plugin reads nothing from `art/`. `Launch`
+and `LaunchV2` there are the videos of version 1 (the slot machine).
 
 ## 4. Verification gates
 
-1. `claude plugin validate .` → zero errors.
-2. `node --test tests/*.test.js` → sheet geometry/palette/seams/overlays,
-   compositor, machine phases and landings, rng distribution, economy,
-   renderers, mod helpers.
-3. `node scripts/dev/build-sprites.js` twice → identical `lib/sprites.json`.
-4. `node bin/demo.js --outcome=<each>` plays through.
-5. `scripts/dev/pty-smoke.py --tui default|fullscreen` → the 40 × 10
-   rectangle is fully painted while the turn runs, the result line lands
-   in the transcript, nothing remains after.
-6. Video: frames extracted at every scene start and reel stop, `ffprobe`
-   for format and duration, `silencedetect` for audio gaps.
+1. `claude plugin validate .` passes with zero errors.
+2. `node --test tests/*.test.js`: scenes paint a full 40 × 10 frame at
+   every moment for every mascot and outcome; a resting show never changes;
+   the odds match the table; the once-a-day rule; the `/mascot` grammar;
+   and `tests/hooks.test.js`, which drives `hooks/mug.js` end to end with
+   a stand-in engine (first answer of the day shows, the next prompt hides,
+   the same day stays quiet, the next day shows again, subagents and
+   interrupted turns are ignored, `/mascot` takes effect).
+3. `node bin/demo.js all` and `node scripts/dev/contact-sheet.js` for a
+   look at the art.
+4. `scripts/dev/pty-smoke.py` in a real terminal, both layouts: the 40 × 10
+   rectangle appears only after the answer and is gone once the next prompt
+   is sent.

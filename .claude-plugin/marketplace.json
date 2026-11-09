@@ -1,29 +1,30 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "slots-local",
+  "name": "mind-the-mug",
   "owner": {
     "name": "Danylo Vorvul"
   },
-  "description": "Local marketplace that ships exactly one plugin: Claude Slots, a pixel-art slot machine pinned above the prompt.",
-  "version": "1.0.0",
+  "description": "Marketplace that ships exactly one plugin: Mind the Mug, a kind daily reminder not to delegate your reasoning.",
+  "version": "2.0.0",
   "plugins": [
     {
-      "name": "slots",
-      "displayName": "Claude Slots",
-      "description": "Pins a small pixel-art slot machine in a neon cyberpunk style to the bottom-right of the screen, above the prompt: pull the trigger on every prompt, the reels keep turning while Claude works, and you might win a FEATURE, a CLIENT, or a LIFE.",
+      "name": "mind-the-mug",
+      "displayName": "Mind the Mug",
+      "description": "A kind reminder for Claude Code: don't delegate your reasoning, or you'll get a mug. Once a day, after the last response of a turn, a small pixel-art cat shows up above the prompt and knocks something off its shelf. It stays until your next prompt.",
       "source": "./",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "author": {
         "name": "Danylo Vorvul"
       },
-      "homepage": "https://github.com/WorldInnovationsDepartment/claude_slots",
-      "repository": "https://github.com/WorldInnovationsDepartment/claude_slots",
+      "homepage": "https://github.com/WorldInnovationsDepartment/mind_the_mug",
+      "repository": "https://github.com/WorldInnovationsDepartment/mind_the_mug",
       "license": "MIT",
       "category": "fun",
       "keywords": [
-        "slot-machine",
-        "spinner",
+        "mascot",
         "pixel-art",
+        "cat",
+        "mug",
         "fun"
       ],
       "defaultEnabled": true

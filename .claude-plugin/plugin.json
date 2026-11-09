@@ -1,31 +1,51 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
-  "name": "slots",
-  "displayName": "Claude Slots",
-  "version": "1.0.0",
-  "description": "Pins a small pixel-art slot machine in a neon cyberpunk style to the bottom-right of the screen, above the prompt: pull the trigger on every prompt, the reels keep turning while Claude works, and you might win a FEATURE, a CLIENT, or a LIFE.",
+  "name": "mind-the-mug",
+  "displayName": "Mind the Mug",
+  "version": "2.0.0",
+  "description": "A kind reminder for Claude Code: don't delegate your reasoning, or you'll get a mug. Once a day, after the last response of a turn, a small pixel-art cat shows up above the prompt and knocks something off its shelf. It stays until your next prompt.",
   "author": {
     "name": "Danylo Vorvul"
   },
-  "homepage": "https://github.com/WorldInnovationsDepartment/claude_slots",
-  "repository": "https://github.com/WorldInnovationsDepartment/claude_slots",
+  "homepage": "https://github.com/WorldInnovationsDepartment/mind_the_mug",
+  "repository": "https://github.com/WorldInnovationsDepartment/mind_the_mug",
   "license": "MIT",
   "keywords": [
-    "slot-machine",
-    "spinner",
+    "mascot",
     "pixel-art",
+    "cat",
+    "mug",
+    "reasoning",
+    "delegation",
+    "reminder",
     "fun",
-    "ui",
-    "easter-egg"
+    "ui"
   ],
   "userConfig": {
-    "startCredits": {
-      "type": "number",
-      "title": "Starting credits",
-      "description": "Credit balance a brand-new install starts with. 1 credit is spent per spin.",
-      "default": 100,
-      "min": 0,
-      "max": 100000
+    "show": {
+      "type": "string",
+      "title": "When it shows",
+      "description": "daily: once a day, after the first answer of the day. always: after every answer. off: never. It always stays until your next prompt. Same as /mascot daily | always | off.",
+      "default": "daily",
+      "options": [
+        "daily",
+        "always",
+        "off"
+      ]
+    },
+    "mascot": {
+      "type": "string",
+      "title": "Mascot",
+      "description": "cat: Shelf Life. dog: Fetch. hen: Hatch. lake: Catch of the Day. oven: Proof. random: a different one each time. Same as /mascot <name>.",
+      "default": "cat",
+      "options": [
+        "cat",
+        "dog",
+        "hen",
+        "lake",
+        "oven",
+        "random"
+      ]
     }
   }
 }
