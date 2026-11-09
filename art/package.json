@@ -1,16 +1,19 @@
 {
-  "name": "slots-art",
+  "name": "mind-the-mug-art",
   "version": "1.0.0",
   "private": true,
-  "description": "Remotion project: the single source of the Claude Slots machine art (terminal sprite sheet + launch video).",
+  "description": "Remotion project: the Mind the Mug launch videos. LaunchV3 (the mascots) draws with the plugin's own lib/scenes; Launch and LaunchV2 are the version 1 slot machine.",
   "type": "module",
   "scripts": {
     "studio": "remotion studio src/index.ts",
     "compositions": "remotion compositions src/index.ts",
-    "render:launch": "remotion render src/index.ts Launch ../docs/launch.mp4 --codec h264 --crf 17 --overwrite"
+    "render:launch": "remotion render src/index.ts Launch ../docs/launch.mp4 --codec h264 --crf 17 --overwrite",
+    "render:launch-v2": "remotion render src/index.ts LaunchV2 ../docs/launch-v2.mp4 --codec h264 --crf 17 --overwrite",
+    "render:launch-v3": "remotion render src/index.ts LaunchV3 ../docs/launch-v3.mp4 --codec h264 --crf 17 --overwrite"
   },
   "dependencies": {
     "@remotion/cli": "4.0.540",
+    "@remotion/google-fonts": "4.0.540",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "remotion": "4.0.540",

@@ -12,7 +12,7 @@ import { Payoff } from "./launch/Payoff.tsx";
 const PROMPTS: Record<string, string> = {
   lose: "fix the flaky test in ci",
   feature: "add dark mode to the settings page",
-  client: "draft the proposal for the Arasaka account",
+  client: "draft the proposal for the new client",
   life: "what should I do with my weekend",
 };
 

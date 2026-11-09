@@ -13,6 +13,10 @@ import { OVERLAY_IDS, OVERLAY_FRAMES, type OverlayId } from "./machine/overlay-g
 import { Machine } from "./machine/Machine.tsx";
 import { Launch } from "./Launch.tsx";
 import timeline from "./timeline.json";
+import { LaunchV2 } from "./LaunchV2.tsx";
+import timelineV2 from "./timeline-v2.json";
+import { LaunchV3 } from "./LaunchV3.tsx";
+import timelineV3 from "./timeline-v3.json";
 
 /** Sprite layers render at 1 px per unit; previews and the video at 27 px per unit (40 × 27 = 1080). */
 export const SPRITE_SCALE = 1;
@@ -82,5 +86,9 @@ export const Root: React.FC = () => (
 
     {/* --- the launch video (built in task 4.2) --- */}
     <Composition id="Launch" component={Launch} width={1920} height={1080} fps={timeline.fps} durationInFrames={timeline.durationInFrames} />
+    {/* --- the 30 s second cut: TOUCH GRASS jackpot, hard cuts, 160 BPM --- */}
+    <Composition id="LaunchV2" component={LaunchV2} width={1920} height={1080} fps={timelineV2.fps} durationInFrames={timelineV2.durationInFrames} />
+    {/* --- the launch video of Mind the Mug: don't delegate your reasoning, or you'll get a mug --- */}
+    <Composition id="LaunchV3" component={LaunchV3} width={1920} height={1080} fps={timelineV3.fps} durationInFrames={timelineV3.durationInFrames} />
   </>
 );

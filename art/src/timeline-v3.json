@@ -1,0 +1,30 @@
+{
+  "fps": 30,
+  "bpm": 120,
+  "durationInFrames": 1530,
+  "scenes": [
+    { "id": "hook", "start": 0 },
+    { "id": "again", "start": 180 },
+    { "id": "turn", "start": 420 },
+    { "id": "product", "start": 780 },
+    { "id": "mascots", "start": 1050 },
+    { "id": "cta", "start": 1320 }
+  ],
+  "drop": 600,
+  "final": 1440,
+  "hits": [
+    { "frame": 75, "kind": "thud" },
+    { "frame": 225, "kind": "thud" },
+    { "frame": 255, "kind": "thud" },
+    { "frame": 285, "kind": "thud" },
+    { "frame": 300, "kind": "slam" },
+    { "frame": 510, "kind": "pop" },
+    { "frame": 600, "kind": "slam" },
+    { "frame": 675, "kind": "thud" },
+    { "frame": 855, "kind": "pop" },
+    { "frame": 1050, "kind": "pop" },
+    { "frame": 1185, "kind": "pop" },
+    { "frame": 1320, "kind": "slam" },
+    { "frame": 1440, "kind": "thud" }
+  ]
+}

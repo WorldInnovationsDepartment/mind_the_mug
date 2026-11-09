@@ -28,7 +28,7 @@ export const Payoff: React.FC<{ durationInFrames: number }> = ({ durationInFrame
             <div style={{ marginTop: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
               <GlitchText text="Claude Slots" size={92} color={theme.colors.primary} shift={4} />
               <div style={{ fontFamily: theme.fonts.mono, fontSize: 30, color: theme.colors.accent }}>/plugin install slots@slots-local</div>
-              <div style={{ fontFamily: theme.fonts.mono, fontSize: 24, color: theme.colors.textDim }}>github.com/WorldInnovationsDepartment/claude_slots · no eddies were harmed</div>
+              <div style={{ fontFamily: theme.fonts.mono, fontSize: 24, color: theme.colors.textDim }}>github.com/WorldInnovationsDepartment/mind_the_mug · no eddies were harmed</div>
             </div>
           </Entrance>
         </AbsoluteFill>

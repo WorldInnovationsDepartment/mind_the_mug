@@ -36,5 +36,6 @@ export const theme = {
     snappy: { damping: 14, stiffness: 160, mass: 0.6 },
     smooth: { damping: 20, stiffness: 90, mass: 1 },
     bouncy: { damping: 11, stiffness: 170, mass: 0.7 },
+    hard: { damping: 18, stiffness: 340, mass: 0.5 }, // launch v2 slams: settles in ~8 frames
   },
 } as const;

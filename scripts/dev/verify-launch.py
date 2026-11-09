@@ -7,14 +7,18 @@
   - ffmpeg silencedetect: no silent stretch over 2 s
   - accent alignment: an onset in the 1-5 kHz band within 50 ms of every reel-stop frame
 
-Run: python3 scripts/dev/verify-launch.py  (needs ffmpeg/ffprobe on PATH; stdlib only otherwise)
+Run: python3 scripts/dev/verify-launch.py        (v1: docs/launch.mp4, timeline.json, 45-75 s, docs/review/)
+     python3 scripts/dev/verify-launch.py --v2   (v2: docs/launch-v2.mp4, timeline-v2.json, 25-35 s, docs/review-v2/)
+(needs ffmpeg/ffprobe on PATH; stdlib only otherwise)
 """
 import json, os, struct, subprocess, sys, zlib, math, array
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MP4 = os.path.join(ROOT, "docs", "launch.mp4")
-REVIEW = os.path.join(ROOT, "docs", "review")
-TL = json.load(open(os.path.join(ROOT, "art", "src", "timeline.json")))
+V2 = "--v2" in sys.argv
+MP4 = os.path.join(ROOT, "docs", "launch-v2.mp4" if V2 else "launch.mp4")
+REVIEW = os.path.join(ROOT, "docs", "review-v2" if V2 else "review")
+TL = json.load(open(os.path.join(ROOT, "art", "src", "timeline-v2.json" if V2 else "timeline.json")))
+DUR_RANGE = (25, 35) if V2 else (45, 75)
 STOP_SETS = [TL["terminal"]] + TL["pulls"]  # every turn that stops on screen
 FPS = TL["fps"]
 ok = True
@@ -40,7 +44,7 @@ if not ACCENTS_ONLY:
     if v.get("r_frame_rate") != "30/1": fail("fps")
     if v.get("codec_name") != "h264": fail("video codec")
     if a.get("codec_name") != "aac": fail("audio codec")
-    if not (45 <= dur <= 75): fail("duration")
+    if not (DUR_RANGE[0] <= dur <= DUR_RANGE[1]): fail("duration")
 
     # 2. frames at scene starts and reel stops
     os.makedirs(REVIEW, exist_ok=True)

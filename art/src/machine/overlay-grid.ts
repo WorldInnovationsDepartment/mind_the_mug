@@ -52,7 +52,12 @@ function glitchBars(g: Grid, frameIdx: number): void {
   }
 }
 
-export function overlayGrid(id: OverlayId, frameIdx: number): Grid {
+/**
+ * `bandWords` is video-only: the jackpot band cycles through these words per blink
+ * instead of "A LIFE" (the launch video v2 shows TOUCH / GRASS). The sprite sheet
+ * the plugin ships is built without it and is unchanged.
+ */
+export function overlayGrid(id: OverlayId, frameIdx: number, bandWords?: readonly string[]): Grid {
   const g = makeGrid(W, H);
   const n = OVERLAY_FRAMES[id];
   const f = ((frameIdx % n) + n) % n;
@@ -71,7 +76,8 @@ export function overlayGrid(id: OverlayId, frameIdx: number): Grid {
     case "win-life": {
       borderFlash(g, f % 2 === 0 ? P.yellow : P.yellowPale);
       sparkles(g, f, P.yellowPale, 0.05);
-      if (blinkOn) band(g, "A LIFE", P.yellow, P.ink);
+      const words = bandWords && bandWords.length ? bandWords : ["A LIFE"];
+      if (blinkOn) band(g, words[Math.floor(f / 6) % words.length], P.yellow, P.ink);
       return g;
     }
     case "lose": {

@@ -13,7 +13,9 @@
 //   riser       filtered noise swelling for 1.5 s before each stop
 //   accent      a clank + noise burst on every reel-stop frame, with the bed ducked under it; a chord on the last LIFE stop
 //
-// Run: node scripts/dev/make-music.js   -> art/public/launch-track.wav
+// Run: node scripts/dev/make-music.js        -> art/public/launch-track.wav   (v1, 60 s, timeline.json)
+//      node scripts/dev/make-music.js --v2   -> art/public/launch-track-v2.wav (v2, 30 s, timeline-v2.json;
+//                                               the faster cut adds eighth-note hats and an octave-up arp)
 // Constants to taste are at the top.
 
 import fs from 'node:fs';
@@ -21,8 +23,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const TIMELINE = JSON.parse(fs.readFileSync(path.join(ROOT, 'art', 'src', 'timeline.json'), 'utf8'));
-const OUT = path.join(ROOT, 'art', 'public', 'launch-track.wav');
+const V2 = process.argv.includes('--v2');
+const TIMELINE = JSON.parse(fs.readFileSync(path.join(ROOT, 'art', 'src', V2 ? 'timeline-v2.json' : 'timeline.json'), 'utf8'));
+const OUT = path.join(ROOT, 'art', 'public', V2 ? 'launch-track-v2.wav' : 'launch-track.wav');
 
 // ---- tuning -----------------------------------------------------------------
 const SAMPLE_RATE = 44100;
@@ -157,9 +160,10 @@ for (let b = 0; b < totalBeats; b++) {
   add(tS, BEAT_S, (t) => bassBeat(root, t, BEAT_S), 0, e);
   if (e >= 1) {
     add(tS + BEAT_S / 2, 0.08, hat, 0.35, 1);
+    if (V2) add(tS, 0.06, hat, -0.35, 0.6); // v2 drives on eighths
     for (let s = 0; s < 4; s++) {
       const idx = (b * 4 + s) % ARP_PATTERN.length;
-      const midi = root + 24 + ARP_PATTERN[idx] + (bar % 8 >= 4 ? 12 : 0);
+      const midi = root + 24 + ARP_PATTERN[idx] + ((V2 ? bar % 4 >= 2 : bar % 8 >= 4) ? 12 : 0);
       add(tS + s * SIXTEENTH_S, SIXTEENTH_S, (t) => arpNote(midi, t, SIXTEENTH_S), s % 2 ? -0.5 : 0.5, 1);
     }
   } else if (b % 2 === 0) {
@@ -188,7 +192,7 @@ for (const pull of STOP_SETS) {
 for (const pull of STOP_SETS) {
   add(frameS(pull.stopFrame) - RISER_S, RISER_S, riser, 0, 1);
   pull.reelStops.forEach((f, i) => {
-    const last = pull.id === 'life' && i === 2;
+    const last = pull.outcome === 'LIFE' && i === 2; // the jackpot's final stop gets the chord
     add(frameS(f), 0.5, clank, i === 0 ? -0.4 : i === 1 ? 0 : 0.4, last ? 3.0 : 2.3);
     if (last) add(frameS(f), 2.5, chordStab, 0, 1.3);
   });
