@@ -165,27 +165,6 @@ collapses the band if you want it out of the way before your next prompt.
 The last two can be run directly: `node bin/demo.js dog life` (animated in a
 real terminal), `node bin/demo.js all`, `node bin/stats.js`.
 
-## Upgrading from Claude Slots
-
-This plugin used to be called Claude Slots (plugin id `slots`). Version 1
-pinned a neon slot machine above the prompt and charged a credit per prompt;
-version 2 replaced the machine with the mascots; and the name followed the
-idea. The plugin id is now `mind-the-mug`, so an old install has to be
-replaced:
-
-```
-/plugin uninstall slots@slots-local
-/plugin marketplace remove slots-local
-/plugin marketplace add WorldInnovationsDepartment/mind_the_mug
-/plugin install mind-the-mug@mind-the-mug
-```
-
-(or, from a checkout, `/plugin marketplace add /path/to/the/checkout`). The
-old store files (`~/.claude/plugins/store/slots*.json`: the credit balance
-and the earlier record) are not read any more and can be deleted. The
-GitHub repository was renamed with the plugin, from `claude_slots` to
-`mind_the_mug`; the old address redirects.
-
 ## Repository layout
 
 ```
