@@ -14,7 +14,8 @@
     "stats": "node bin/stats.js",
     "make-music": "node scripts/dev/make-music.js",
     "make-music-v3": "node scripts/dev/make-music-v3.js",
-    "contact-sheet": "node scripts/dev/contact-sheet.js"
+    "contact-sheet": "node scripts/dev/contact-sheet.js",
+    "hero": "node scripts/dev/readme-hero.js"
   },
   "dependencies": {},
   "devDependencies": {}

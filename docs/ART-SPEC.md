@@ -128,12 +128,28 @@ In a band too small for the picture, one line:
 - No casino words: no credits, spins, reels, jackpots, wins or losses.
 - No names from other people's films, games, shows or brands.
 
-## 8. Icon and contact sheet
+## 8. README picture, icon and contact sheet
+
+`node scripts/dev/readme-hero.js` writes `docs/hero.svg`, the picture at the
+top of the README: a terminal, 84 columns wide, in which one turn plays on a
+16 s loop. A prompt is typed, Claude makes three tool calls and answers, and
+after that last response the cat's show plays above the prompt (three taps,
+then the mug), with the caption and the turn line beside it, and is held for
+4 s. The mascot, the caption and the turn line come from `lib/show.js`, at
+the mod's own 10 frames a second. It is one SVG of about 40 KB: text pinned
+to a 9 × 20 px character grid with `textLength`, the resting frame drawn in
+full, and every other frame stored as the pixels that differ from it on a
+film strip that CSS keyframes step through. Without animation (reduced
+motion, or a renderer that ignores it) it shows the resting state: the
+whole turn, the cat next to the fallen mug, the reminder. `--at=<ms>` writes
+one frozen moment for review. `tests/hero.test.js` fails when the committed
+file no longer matches what the script generates.
 
 `node scripts/dev/contact-sheet.js` writes `.claude-plugin/icon.png` (the
 cat waiting on its shelf, 960 × 960) and `docs/mascots.png` (one row per
-mascot: the ask, a tap, then the resting frame of every outcome). Both are
-deterministic.
+mascot: the ask, a tap, then the resting frame of every outcome).
+
+All three are deterministic.
 
 ## 9. Launch video (`art/src/LaunchV3.tsx`, `art/src/timeline-v3.json`)
 

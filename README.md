@@ -8,7 +8,7 @@ above the prompt, and knocks something off its shelf. Almost always the mug.
 It stays there until you send your next prompt, and then it is gone until
 tomorrow.
 
-<p align="center"><img src=".claude-plugin/icon.png" width="256" alt="a cat on a shelf, next to a mug, a rubber duck, a phone and a plant"></p>
+<p align="center"><img src="docs/hero.svg" alt="A terminal. After Claude's answer, a pixel-art cat appears above the prompt, walks its shelf and knocks the mug off. Beside it: Don't delegate your reasoning. Or you'll get a mug."></p>
 
 ## The idea
 
@@ -182,8 +182,8 @@ bin/demo.js         /mind-the-mug:demo
 bin/stats.js        /mind-the-mug:stats
 commands/           the two file commands (/mascot is registered by the mod itself)
 tests/              node --test
-scripts/dev/        contact-sheet.js, pty-smoke.py, make-music-v3.js, verify-launch-v3.py
-docs/               CONCEPT.md, ARCHITECTURE.md, ART-SPEC.md, mascots.png
+scripts/dev/        readme-hero.js, contact-sheet.js, pty-smoke.py, make-music-v3.js, verify-launch-v3.py
+docs/               CONCEPT.md, ARCHITECTURE.md, ART-SPEC.md, hero.svg, mascots.png
 art/                Remotion project of the launch video (see below)
 openspec/           specs
 ```
@@ -195,6 +195,7 @@ claude plugin validate .               # manifest, marketplace and mod module: m
 node --test tests/*.test.js            # scenes, timeline, odds, settings, once-a-day rule, the hooks end to end
 node bin/demo.js cat life              # watch one showing in your terminal
 node scripts/dev/contact-sheet.js      # regenerate docs/mascots.png and .claude-plugin/icon.png
+node scripts/dev/readme-hero.js        # regenerate docs/hero.svg, the animated picture at the top of this page
 ```
 
 ### Live verification in a real terminal

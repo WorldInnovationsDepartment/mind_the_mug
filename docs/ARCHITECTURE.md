@@ -132,7 +132,9 @@ room for it beside the sprite; when the band has fewer than 40 columns or
 The scenes come from the "Lighter worlds" direction study (five worlds
 drawn at the mod's real size); `lib/scenes/*.js` are those drawings, and
 [ART-SPEC.md](ART-SPEC.md) describes them. `scripts/dev/contact-sheet.js`
-renders `docs/mascots.png` and the plugin icon from the same code.
+renders `docs/mascots.png` and the plugin icon from the same code, and
+`scripts/dev/readme-hero.js` renders `docs/hero.svg`, the animated terminal
+at the top of the README, from `lib/show.js`.
 
 `art/` is the Remotion project of the launch video. `LaunchV3` imports
 `lib/scenes/` through `art/src/launch-v3/engine.ts`, so the video shows
